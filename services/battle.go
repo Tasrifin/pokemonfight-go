@@ -126,7 +126,15 @@ func (b *BattleService) CreateAutoBattle(request params.CreateAutoBattle) *param
 }
 
 func (b *BattleService) GetTotalScores() *params.Response {
-	data := b.battleRepo.GetTotalScores()
+	data, err := b.battleRepo.GetTotalScores()
+	if err != nil {
+		return &params.Response{
+			Status: http.StatusInternalServerError,
+			Payload: gin.H{
+				"error": err.Error(),
+			},
+		}
+	}
 
 	return &params.Response{
 		Status: http.StatusOK,
@@ -134,4 +142,82 @@ func (b *BattleService) GetTotalScores() *params.Response {
 			"data": data,
 		},
 	}
+}
+
+func (b *BattleService) BattleEliminatePokemon(request params.BattleEliminatePokemon) *params.Response {
+	detailPokemonId, err := b.battleRepo.GetBattleDetailByIDAndPokemonID(request.BattleID, request.PokemonID)
+	if err != nil {
+		return &params.Response{
+			Status: http.StatusInternalServerError,
+			Payload: gin.H{
+				"error": err.Error(),
+			},
+		}
+	}
+	if detailPokemonId.ID == 0 {
+		return &params.Response{
+			Status: http.StatusNotFound,
+			Payload: gin.H{
+				"error": "detail not found",
+			},
+		}
+	}
+
+	battleDetails, err := b.battleRepo.GetBattleDetailByBattleID(request.BattleID)
+	if err != nil {
+		return &params.Response{
+			Status: http.StatusInternalServerError,
+			Payload: gin.H{
+				"error": err.Error(),
+			},
+		}
+	}
+	if len(*battleDetails) == 0 {
+		return &params.Response{
+			Status: http.StatusNotFound,
+			Payload: gin.H{
+				"error": "detail not found",
+			},
+		}
+	}
+
+	for _, detail := range *battleDetails {
+		if detail.Score < detailPokemonId.Score {
+			updateData := models.BattleDetail{
+				Score:     detail.Score + 1,
+				UpdatedAt: time.Now(),
+			}
+			err := b.battleRepo.UpdateBattleDetailPokemon(detail.ID, updateData)
+			if err != nil {
+				return &params.Response{
+					Status: http.StatusInternalServerError,
+					Payload: gin.H{
+						"error": err.Error(),
+					},
+				}
+			}
+		}
+	}
+
+	updateData := models.BattleDetail{
+		Score:     detailPokemonId.Score - detailPokemonId.Score,
+		UpdatedAt: time.Now(),
+	}
+	err = b.battleRepo.UpdateBattleDetailPokemon(detailPokemonId.ID, updateData)
+	if err != nil {
+		return &params.Response{
+			Status: http.StatusInternalServerError,
+			Payload: gin.H{
+				"error": err.Error(),
+			},
+		}
+	}
+
+	return &params.Response{
+		Status: http.StatusOK,
+		Payload: gin.H{
+			"message": "success",
+		},
+	}
+
 }

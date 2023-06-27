@@ -27,6 +27,7 @@ func InitRoute() {
 	route.GET("/pokemons", pokemonController.GetAllPokemons)
 	route.GET("/pokemon/scores", battleController.GetTotalScores)
 	route.POST("/battle/auto", battleController.CreateAutoBattle)
+	route.PUT("/battle/:battleID/eliminate-pokemon", battleController.BattleEliminatePokemon)
 
 	route.Run(os.Getenv("APP_PORT"))
 }

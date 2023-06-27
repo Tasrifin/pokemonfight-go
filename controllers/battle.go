@@ -32,26 +32,13 @@ func (p *BattleController) CreateAutoBattle(c *gin.Context) {
 		return
 	}
 
-	// result := p.pokemonService.GetAllPokemons()
+	result := p.battleService.CreateAutoBattle(req)
 
-	// c.JSON(result.Status, result.Payload)
+	c.JSON(result.Status, result.Payload)
 }
 
-func (p *BattleController) CreateManualBattle(c *gin.Context) {
-	var req params.CreateManualBattle
+func (p *BattleController) GetTotalScores(c *gin.Context) {
+	result := p.battleService.GetTotalScores()
 
-	err := c.ShouldBind(&req)
-
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, params.Response{
-			Status:  http.StatusBadRequest,
-			Payload: err.Error(),
-		})
-
-		return
-	}
-
-	// result := p.pokemonService.GetAllPokemons()
-
-	// c.JSON(result.Status, result.Payload)
+	c.JSON(result.Status, result.Payload)
 }

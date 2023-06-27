@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Tasrifin/pokemonfight-go/models"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -16,6 +17,8 @@ func ConnectDB() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+
+	db.AutoMigrate(models.Battle{}, models.BattleDetail{})
 
 	return db
 

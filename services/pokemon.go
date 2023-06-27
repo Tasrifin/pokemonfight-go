@@ -51,9 +51,23 @@ func (p *PokemonService) GetAllPokemons() *params.Response {
 		return &params.Response{
 			Status: http.StatusInternalServerError,
 			Payload: gin.H{
-				"message": err.Error(),
+				"error": err.Error(),
 			},
 		}
+	}
+
+	for i, data := range resultData.Results {
+		id, err := helpers.GetIDByUrl(data.Url)
+		if err != nil {
+			return &params.Response{
+				Status: http.StatusInternalServerError,
+				Payload: gin.H{
+					"error": err.Error(),
+				},
+			}
+		}
+
+		resultData.Results[i].Id = id
 	}
 
 	return &params.Response{

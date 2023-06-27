@@ -2,24 +2,9 @@ package helpers
 
 import (
 	"crypto/tls"
-	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"time"
-
-	"github.com/joho/godotenv"
 )
-
-func GetENV(key string) string {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-
-	return os.Getenv(key)
-}
 
 func ReqHTTP(method string, url string) (result *http.Response, err error) {
 	client := &http.Client{
@@ -37,11 +22,6 @@ func ReqHTTP(method string, url string) (result *http.Response, err error) {
 
 	result, err = client.Do(req)
 	if err != nil {
-		return nil, err
-	}
-
-	if result.StatusCode != http.StatusOK {
-		err := fmt.Errorf("request status error : %v", result.StatusCode)
 		return nil, err
 	}
 

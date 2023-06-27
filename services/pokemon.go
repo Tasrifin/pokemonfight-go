@@ -36,6 +36,12 @@ func (p *PokemonService) GetAllPokemons() *params.Response {
 		}
 	}
 
+	if requestData.StatusCode != http.StatusOK {
+		return &params.Response{
+			Status: requestData.StatusCode,
+		}
+	}
+
 	defer requestData.Body.Close()
 
 	var resultData models.GetPokemonByAPI

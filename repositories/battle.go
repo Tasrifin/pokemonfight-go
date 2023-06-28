@@ -8,8 +8,8 @@ import (
 )
 
 type BattleRepo interface {
-	CreateBattle(data *models.Battle) (*models.Battle, error)
-	CreateBattleDetail(data *models.BattleDetail) (*models.BattleDetail, error)
+	CreateBattle(data models.Battle) (models.Battle, error)
+	CreateBattleDetail(param []models.BattleDetail) (data []models.BattleDetail, err error)
 	GetTotalScores() ([]models.GetTotalScores, error)
 	GetBattleDetailByBattleID(battleId int) ([]models.BattleDetail, error)
 	GetBattleDetailByIDAndPokemonID(battleId, pokemonId int) (models.BattleDetail, error)
@@ -25,11 +25,11 @@ func NewBattleRepo(db *gorm.DB) BattleRepo {
 	return &battleRepo{db}
 }
 
-func (b *battleRepo) CreateBattle(data *models.Battle) (*models.Battle, error) {
+func (b *battleRepo) CreateBattle(data models.Battle) (models.Battle, error) {
 	return data, b.db.Create(&data).Error
 }
 
-func (b *battleRepo) CreateBattleDetail(data *models.BattleDetail) (*models.BattleDetail, error) {
+func (b *battleRepo) CreateBattleDetail(data []models.BattleDetail) ([]models.BattleDetail, error) {
 	return data, b.db.Create(&data).Error
 }
 

@@ -31,7 +31,7 @@ func (b *BattleService) CreateAutoBattle(request params.CreateAutoBattle) *param
 	checkDuplicate := helpers.CheckDuplicateID(request.Pokemons)
 	if checkDuplicate {
 		return &params.Response{
-			Status: http.StatusInternalServerError,
+			Status: http.StatusBadRequest,
 			Payload: gin.H{
 				"error": "Pokemon is duplicated, please re-check",
 			},
@@ -40,7 +40,7 @@ func (b *BattleService) CreateAutoBattle(request params.CreateAutoBattle) *param
 
 	if len(request.Pokemons) != 5 {
 		return &params.Response{
-			Status: http.StatusInternalServerError,
+			Status: http.StatusBadRequest,
 			Payload: gin.H{
 				"error": "Total Pokemons must be 5",
 			},
@@ -172,7 +172,7 @@ func (b *BattleService) BattleEliminatePokemon(request params.BattleEliminatePok
 			},
 		}
 	}
-	if len(*battleDetails) == 0 {
+	if len(battleDetails) == 0 {
 		return &params.Response{
 			Status: http.StatusNotFound,
 			Payload: gin.H{
@@ -181,7 +181,7 @@ func (b *BattleService) BattleEliminatePokemon(request params.BattleEliminatePok
 		}
 	}
 
-	for _, detail := range *battleDetails {
+	for _, detail := range battleDetails {
 		if detail.Score < detailPokemonId.Score {
 			updateData := models.BattleDetail{
 				Score:     detail.Score + 1,
@@ -220,4 +220,49 @@ func (b *BattleService) BattleEliminatePokemon(request params.BattleEliminatePok
 		},
 	}
 
+}
+
+func (b *BattleService) GetAllBattleData(request params.GetBattleData) *params.Response {
+	startDate, _ := time.Parse(constants.DATETIME_LAYOUT, request.StartDate)
+	endDate, _ := time.Parse(constants.DATETIME_LAYOUT, request.EndDate)
+
+	if startDate.After(endDate) {
+		return &params.Response{
+			Status: http.StatusBadRequest,
+			Payload: gin.H{
+				"error": "end date must be greater than start date",
+			},
+		}
+	}
+
+	battleData, err := b.battleRepo.GetAllBattleData(startDate, endDate)
+	if err != nil {
+		return &params.Response{
+			Status: http.StatusInternalServerError,
+			Payload: gin.H{
+				"error": err.Error(),
+			},
+		}
+	}
+
+	for i, battle := range battleData {
+		battleDetails, err := b.battleRepo.GetBattleDetailByBattleID(battle.ID)
+		if err != nil {
+			return &params.Response{
+				Status: http.StatusInternalServerError,
+				Payload: gin.H{
+					"error": err.Error(),
+				},
+			}
+		}
+
+		battleData[i].BattleDetails = battleDetails
+	}
+
+	return &params.Response{
+		Status: http.StatusOK,
+		Payload: gin.H{
+			"data": battleData,
+		},
+	}
 }

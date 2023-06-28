@@ -14,3 +14,8 @@ type BattleEliminatePokemon struct {
 	BattleID  int `json:"battle_id"`
 	PokemonID int `json:"pokemon_id" binding:"required"`
 }
+
+type GetBattleData struct {
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
+}

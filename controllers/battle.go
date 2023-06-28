@@ -65,3 +65,13 @@ func (p *BattleController) BattleEliminatePokemon(c *gin.Context) {
 
 	c.JSON(result.Status, result.Payload)
 }
+
+func (p *BattleController) GetAllBattleData(c *gin.Context) {
+	var req params.GetBattleData
+
+	req.StartDate = c.Query("start_date")
+	req.EndDate = c.Query("end_date")
+	result := p.battleService.GetAllBattleData(req)
+
+	c.JSON(result.Status, result.Payload)
+}

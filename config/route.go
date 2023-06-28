@@ -26,6 +26,7 @@ func InitRoute() {
 	//ROUTE START
 	route.GET("/pokemons", pokemonController.GetAllPokemons)
 	route.GET("/pokemon/scores", battleController.GetTotalScores)
+	route.GET("/battles", battleController.GetAllBattleData)
 	route.POST("/battle/auto", battleController.CreateAutoBattle)
 	route.PUT("/battle/:battleID/eliminate-pokemon", battleController.BattleEliminatePokemon)
 

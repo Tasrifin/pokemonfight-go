@@ -1,1 +1,1 @@
-# pokemonfight-go
+# Battle Pokemon

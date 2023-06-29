@@ -13,7 +13,7 @@ type BattleRepo interface {
 	GetTotalScores() ([]models.GetTotalScores, error)
 	GetBattleDetailByBattleID(battleId int) ([]models.BattleDetail, error)
 	GetBattleDetailByIDAndPokemonID(battleId, pokemonId int) (models.BattleDetail, error)
-	UpdateBattleDetailPokemon(detailId int, updateData models.BattleDetail) error
+	UpdateBattleDetailPokemon([]models.BattleDetail) error
 	GetAllBattleData(start, end time.Time) ([]models.Battle, error)
 }
 
@@ -51,8 +51,8 @@ func (b *battleRepo) GetBattleDetailByIDAndPokemonID(battleId, pokemonId int) (m
 	return detail, err
 }
 
-func (b *battleRepo) UpdateBattleDetailPokemon(detailId int, updateData models.BattleDetail) error {
-	err := b.db.Table("battle_details").Select("score", "updated_at").Where("id=?", detailId).Updates(updateData).Error
+func (b *battleRepo) UpdateBattleDetailPokemon(data []models.BattleDetail) error {
+	err := b.db.Save(&data).Error
 	return err
 }
 

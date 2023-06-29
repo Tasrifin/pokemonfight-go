@@ -78,15 +78,13 @@ func (b *BattleService) CreateAutoBattle(request params.CreateAutoBattle) *param
 		pokemonDetail := models.BattleDetail{
 			PokemonId: poke,
 			Score:     score,
-			CreatedAt: time.Now(),
 		}
 
 		battleDetails = append(battleDetails, pokemonDetail)
 	}
 
 	battleMaster := models.Battle{
-		Name:      request.BattleName,
-		CreatedAt: time.Now(),
+		Name: request.BattleName,
 	}
 
 	createdBattle, err := b.battleRepo.CreateBattle(battleMaster)
@@ -115,7 +113,7 @@ func (b *BattleService) CreateAutoBattle(request params.CreateAutoBattle) *param
 	return &params.Response{
 		Status: http.StatusOK,
 		Payload: gin.H{
-			"message": "Success",
+			"message": "success",
 		},
 	}
 }
@@ -176,29 +174,27 @@ func (b *BattleService) BattleEliminatePokemon(request params.BattleEliminatePok
 		}
 	}
 
+	updateDetails := []models.BattleDetail{}
 	for _, detail := range battleDetails {
 		if detail.Score < detailPokemonId.Score {
 			updateData := models.BattleDetail{
+				ID:        detail.ID,
+				PokemonId: detail.PokemonId,
 				Score:     detail.Score + 1,
-				UpdatedAt: time.Now(),
+				BattleID:  detail.BattleID,
 			}
-			err := b.battleRepo.UpdateBattleDetailPokemon(detail.ID, updateData)
-			if err != nil {
-				return &params.Response{
-					Status: http.StatusInternalServerError,
-					Payload: gin.H{
-						"error": err.Error(),
-					},
-				}
-			}
+			updateDetails = append(updateDetails, updateData)
 		}
 	}
 
-	updateData := models.BattleDetail{
+	updateDetails = append(updateDetails, models.BattleDetail{
+		ID:        detailPokemonId.ID,
+		PokemonId: detailPokemonId.PokemonId,
 		Score:     0,
-		UpdatedAt: time.Now(),
-	}
-	err = b.battleRepo.UpdateBattleDetailPokemon(detailPokemonId.ID, updateData)
+		BattleID:  detailPokemonId.BattleID,
+	})
+
+	err = b.battleRepo.UpdateBattleDetailPokemon(updateDetails)
 	if err != nil {
 		return &params.Response{
 			Status: http.StatusInternalServerError,

@@ -11,12 +11,13 @@
    ```
 
 ## Endpoints List
-[GET] `/pokemons` : Pokemon list
-[GET] `/pokemon/scores` : Pokemon score board
-[GET] `/battles` : Get Battle List
-[POST] `/battle/auto`
-[POST] `/battle/:battleID/eliminate-pokemon`
+[GET] `/pokemons` : Pokemon list </br>
+[GET] `/pokemon/scores` : Pokemon score board </br>
+[GET] `/battles` : Get Battle List </br>
+[POST] `/battle/auto` </br>
+[POST] `/battle/:battleID/eliminate-pokemon` </br>
 
 *All API Docs attached in /docs/Farmacare - Pokemons.postman_collection.json
 
 ## ERD
+![ERD](https://raw.githubusercontent.com/Tasrifin/pokemonfight-go/develop/docs/POKEMON%20-%20ERD.png)

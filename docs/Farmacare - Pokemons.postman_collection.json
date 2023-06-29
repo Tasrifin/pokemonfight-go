@@ -1,0 +1,132 @@
+{
+	"info": {
+		"_postman_id": "eb9d895b-d634-4e16-b410-ebd827475e59",
+		"name": "Farmacare - Pokemons",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9794629"
+	},
+	"item": [
+		{
+			"name": "Get Pokemons",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8888/pokemons",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"pokemons"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Battle [Auto]",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"battle_name\" : \"Battle 2\",\n   \"pokemons\" : [1,2,3,4,5]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8888/battle/auto",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"battle",
+						"auto"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Pokemon Scores",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8888/pokemon/scores",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"pokemon",
+						"scores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Eliminate Pokemon",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"pokemon_id\" : 3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8888/battle/2/eliminate-pokemon",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"battle",
+						"2",
+						"eliminate-pokemon"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Battle",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8888/battles?start_date=2023-06-28 00:00:00&end_date=2023-06-28 23:59:59",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"battles"
+					],
+					"query": [
+						{
+							"key": "start_date",
+							"value": "2023-06-28 00:00:00"
+						},
+						{
+							"key": "end_date",
+							"value": "2023-06-28 23:59:59"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

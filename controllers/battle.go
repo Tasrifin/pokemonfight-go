@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Tasrifin/pokemonfight-go/params"
 	"github.com/Tasrifin/pokemonfight-go/services"
@@ -39,6 +40,38 @@ func (p *BattleController) CreateAutoBattle(c *gin.Context) {
 
 func (p *BattleController) GetTotalScores(c *gin.Context) {
 	result := p.battleService.GetTotalScores()
+
+	c.JSON(result.Status, result.Payload)
+}
+
+func (p *BattleController) BattleEliminatePokemon(c *gin.Context) {
+	var req params.BattleEliminatePokemon
+
+	err := c.ShouldBind(&req)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, params.Response{
+			Status:  http.StatusBadRequest,
+			Payload: err.Error(),
+		})
+
+		return
+	}
+
+	battleId, _ := strconv.Atoi(c.Param("battleID"))
+	req.BattleID = battleId
+
+	result := p.battleService.BattleEliminatePokemon(req)
+
+	c.JSON(result.Status, result.Payload)
+}
+
+func (p *BattleController) GetAllBattleData(c *gin.Context) {
+	var req params.GetBattleData
+
+	req.StartDate = c.Query("start_date")
+	req.EndDate = c.Query("end_date")
+	result := p.battleService.GetAllBattleData(req)
 
 	c.JSON(result.Status, result.Payload)
 }

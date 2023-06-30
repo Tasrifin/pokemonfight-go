@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -43,10 +42,10 @@ func TestGetTotalScores(t *testing.T) {
 	}
 
 	listTests := []struct {
-		name    string
-		mock    func()
-		want    *params.Response
-		wantErr bool
+		name      string
+		mock      func()
+		want      *params.Response
+		isSuccess bool
 	}{
 		{
 			name: "Get Total Score",
@@ -59,15 +58,20 @@ func TestGetTotalScores(t *testing.T) {
 					"data": data,
 				},
 			},
-			wantErr: false,
+			isSuccess: true,
 		},
 		{
 			name: "Get Total Score Fail",
 			mock: func() {
-				repoMock.On("GetTotalScores", mock.Anything).Return([]models.GetTotalScores{}, errors.New("error")).Once()
+				repoMock.On("GetTotalScores", mock.Anything).Return([]models.GetTotalScores{}, errors.New("db error")).Once()
 			},
-			want:    &params.Response{},
-			wantErr: true,
+			want: &params.Response{
+				Status: http.StatusInternalServerError,
+				Payload: gin.H{
+					"error": "db error",
+				},
+			},
+			isSuccess: false,
 		},
 	}
 
@@ -76,14 +80,7 @@ func TestGetTotalScores(t *testing.T) {
 		battleService := BattleService{battleRepo: repoMock}
 		res := battleService.GetTotalScores()
 
-		if !test.wantErr {
-			log.Print(test.name)
-			assert.Equal(t, test.want, res)
-		}
-		if test.wantErr {
-			log.Print(test.name)
-			assert.Error(t, errors.New("error"), res)
-		}
+		assert.Equal(t, test.want, res)
 	}
 }
 
@@ -129,19 +126,19 @@ func TestGelAllBattleData(t *testing.T) {
 	startDate, _ := time.Parse(constants.DATETIME_LAYOUT, startString)
 	endDate, _ := time.Parse(constants.DATETIME_LAYOUT, endString)
 
-	request := params.GetBattleData{
-		StartDate: startString,
-		EndDate:   endString,
-	}
-
 	listTests := []struct {
-		name    string
-		mock    func()
-		want    *params.Response
-		wantErr bool
+		name      string
+		mock      func()
+		request   params.GetBattleData
+		want      *params.Response
+		isSuccess bool
 	}{
 		{
 			name: "Get All Battle",
+			request: params.GetBattleData{
+				StartDate: startString,
+				EndDate:   endString,
+			},
 			mock: func() {
 				repoMock.On("GetBattleDetailByBattleID", 1).Return(battleDetail, nil).Once()
 				repoMock.On("GetAllBattleData", startDate, endDate).Return(data, nil).Once()
@@ -152,45 +149,42 @@ func TestGelAllBattleData(t *testing.T) {
 					"data": data,
 				},
 			},
-			wantErr: false,
+			isSuccess: true,
 		},
 		{
 			name: "Get All Battle Fail",
+			request: params.GetBattleData{
+				StartDate: endString,
+				EndDate:   startString,
+			},
 			mock: func() {
 				repoMock.On("GetBattleDetailByBattleID", 1).Return([]models.BattleDetail{}, errors.New("error")).Once()
 				repoMock.On("GetAllBattleData", startDate, endDate).Return([]models.Battle{}, errors.New("error")).Once()
 			},
-			want:    &params.Response{},
-			wantErr: true,
+			want: &params.Response{
+				Status: http.StatusBadRequest,
+				Payload: gin.H{
+					"error": "end date must be greater than start date",
+				},
+			},
+			isSuccess: false,
 		},
 	}
 
 	for _, test := range listTests {
 		test.mock()
 		battleService := BattleService{battleRepo: repoMock}
-		res := battleService.GetAllBattleData(request)
+		res := battleService.GetAllBattleData(test.request)
 
-		if !test.wantErr {
-			log.Print(test.name)
-			assert.Equal(t, test.want, res)
-		}
-		if test.wantErr {
-			log.Print(test.name)
-			assert.Error(t, errors.New("error"), res)
-		}
+		assert.Equal(t, test.want, res)
 	}
 }
 
 func TestCreateBattle(t *testing.T) {
 	repoMock := new(mocks.MockBattleRepository)
 
-	request := params.CreateAutoBattle{
-		BattleName: "Battle 1",
-		Pokemons:   []int{1, 2, 3, 4, 5},
-	}
-
 	data := models.Battle{
-		Name: request.BattleName,
+		Name: "Battle 1",
 	}
 
 	battleDetail := []models.BattleDetail{
@@ -217,14 +211,18 @@ func TestCreateBattle(t *testing.T) {
 	}
 
 	listTests := []struct {
-		name    string
-		mock    func()
-		args    params.CreateAutoBattle
-		want    *params.Response
-		wantErr bool
+		name      string
+		mock      func()
+		request   params.CreateAutoBattle
+		want      *params.Response
+		isSuccess bool
 	}{
 		{
 			name: "Create Battle",
+			request: params.CreateAutoBattle{
+				BattleName: "Battle 1",
+				Pokemons:   []int{1, 2, 3, 4, 5},
+			},
 			mock: func() {
 				repoMock.On("CreateBattle", data).Return(data, nil).Once()
 				repoMock.On("CreateBattleDetail", battleDetail).Return(battleDetail, nil).Once()
@@ -235,42 +233,40 @@ func TestCreateBattle(t *testing.T) {
 					"message": "success",
 				},
 			},
-			wantErr: false,
+			isSuccess: true,
 		},
-		// {
-		// 	name: "Get Battle Fail",
-		// 	mock: func() {
-		// 		repoMock.On("CreateBattle", data).Return(models.Battle{}, errors.New("error")).Once()
-		// 		repoMock.On("CreateBattleDetail", battleDetail).Return([]models.BattleDetail{}, errors.New("error")).Once()
-		// 	},
-		// 	want:    &params.Response{},
-		// 	wantErr: true,
-		// },
+		{
+			name: "Create Battle Fail",
+			request: params.CreateAutoBattle{
+				BattleName: "Battle 2",
+				Pokemons:   []int{1, 2, 3, 4},
+			},
+			mock: func() {
+				repoMock.On("CreateBattle", data).Return(models.Battle{}, errors.New("error")).Once()
+				repoMock.On("CreateBattleDetail", battleDetail).Return([]models.BattleDetail{}, errors.New("error")).Once()
+			},
+			want: &params.Response{
+				Status: http.StatusBadRequest,
+				Payload: gin.H{
+					"error": "total Pokemons must be 5",
+				},
+			},
+			isSuccess: false,
+		},
 	}
 
 	for _, test := range listTests {
 		test.mock()
 		battleService := BattleService{battleRepo: repoMock}
-		res := battleService.CreateAutoBattle(request)
+		res := battleService.CreateAutoBattle(test.request)
 
-		if !test.wantErr {
-			assert.Equal(t, res, test.want)
-		}
-		if test.wantErr {
-			log.Print(test.name)
-			assert.Error(t, errors.New("error"), res)
-		}
-
+		assert.Equal(t, res, test.want)
 	}
 }
 
 func TestEliminatePokemon(t *testing.T) {
 	repoMock := new(mocks.MockBattleRepository)
 
-	request := params.BattleEliminatePokemon{
-		BattleID:  1,
-		PokemonID: 3,
-	}
 	battleDetailSingle := models.BattleDetail{ID: 3,
 		PokemonId: 3,
 		Score:     4,
@@ -336,16 +332,20 @@ func TestEliminatePokemon(t *testing.T) {
 	}
 
 	listTests := []struct {
-		name    string
-		mock    func()
-		args    params.CreateAutoBattle
-		want    *params.Response
-		wantErr bool
+		name      string
+		mock      func()
+		request   params.BattleEliminatePokemon
+		want      *params.Response
+		isSuccess bool
 	}{
 		{
 			name: "Eliminate Pokemon",
+			request: params.BattleEliminatePokemon{
+				BattleID:  1,
+				PokemonID: 3,
+			},
 			mock: func() {
-				repoMock.On("GetBattleDetailByIDAndPokemonID", request.BattleID, request.PokemonID).Return(battleDetailSingle, nil).Once()
+				repoMock.On("GetBattleDetailByIDAndPokemonID", 1, 3).Return(battleDetailSingle, nil).Once()
 				repoMock.On("GetBattleDetailByBattleID", 1).Return(battleDetail, nil).Once()
 				repoMock.On("UpdateBattleDetailPokemon", updateData).Return(nil).Once()
 			},
@@ -355,32 +355,32 @@ func TestEliminatePokemon(t *testing.T) {
 					"message": "success",
 				},
 			},
-			wantErr: false,
+			isSuccess: true,
 		},
 		{
 			name: "Eliminate Pokemon Fail",
+			request: params.BattleEliminatePokemon{
+				BattleID:  0,
+				PokemonID: 0,
+			},
 			mock: func() {
-				repoMock.On("GetBattleDetailByIDAndPokemonID", request.BattleID, request.PokemonID).Return(models.BattleDetail{}, errors.New("error")).Once()
+				repoMock.On("GetBattleDetailByIDAndPokemonID", 0, 0).Return(models.BattleDetail{}, nil).Once()
 				repoMock.On("GetBattleDetailByBattleID", 1).Return([]models.BattleDetail{}, errors.New("error")).Once()
 				repoMock.On("UpdateBattleDetailPokemon", updateData).Return(errors.New("error")).Once()
 			},
-			want:    &params.Response{},
-			wantErr: true,
+			want: &params.Response{Status: http.StatusNotFound,
+				Payload: gin.H{
+					"error": "detail not found",
+				}},
+			isSuccess: false,
 		},
 	}
 
 	for _, test := range listTests {
 		test.mock()
 		battleService := BattleService{battleRepo: repoMock}
-		res := battleService.BattleEliminatePokemon(request)
+		res := battleService.BattleEliminatePokemon(test.request)
 
-		if !test.wantErr {
-			assert.Equal(t, res, test.want)
-		}
-		if test.wantErr {
-			log.Print(test.name)
-			assert.Error(t, errors.New("error"), res)
-		}
-
+		assert.Equal(t, res, test.want)
 	}
 }

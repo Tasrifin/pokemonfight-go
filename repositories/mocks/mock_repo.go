@@ -23,22 +23,30 @@ type MockBattleRepository struct {
 
 func (_m *MockBattleRepository) CreateBattle(param models.Battle) (models.Battle, error) {
 	args := _m.Called(param)
-	return args.Get(0).(models.Battle), nil
+	r0, _ := args[0].(models.Battle)
+	r1, _ := args[1].(error)
+	return r0, r1
 }
 
 func (_m *MockBattleRepository) CreateBattleDetail(param []models.BattleDetail) (data []models.BattleDetail, err error) {
 	args := _m.Called(param)
-	return args.Get(0).([]models.BattleDetail), nil
+	r0, _ := args[0].([]models.BattleDetail)
+	r1, _ := args[1].(error)
+	return r0, r1
 }
 
 func (_m *MockBattleRepository) GetTotalScores() ([]models.GetTotalScores, error) {
 	args := _m.Called()
-	return args.Get(0).([]models.GetTotalScores), nil
+	r0, _ := args[0].([]models.GetTotalScores)
+	r1, _ := args[1].(error)
+	return r0, r1
 }
 
 func (_m *MockBattleRepository) GetBattleDetailByBattleID(battleId int) ([]models.BattleDetail, error) {
 	args := _m.Called(battleId)
-	return args.Get(0).([]models.BattleDetail), nil
+	r0, _ := args[0].([]models.BattleDetail)
+	r1, _ := args[1].(error)
+	return r0, r1
 }
 
 func (_m *MockBattleRepository) GetBattleDetailByIDAndPokemonID(battleId, pokemonId int) (models.BattleDetail, error) {
@@ -56,5 +64,7 @@ func (_m *MockBattleRepository) UpdateBattleDetailPokemon(data []models.BattleDe
 
 func (_m *MockBattleRepository) GetAllBattleData(start, end time.Time) ([]models.Battle, error) {
 	args := _m.Called(start, end)
-	return args.Get(0).([]models.Battle), nil
+	r0, _ := args[0].([]models.Battle)
+	r1, _ := args[1].(error)
+	return r0, r1
 }

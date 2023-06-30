@@ -33,7 +33,7 @@ func (b *BattleService) CreateAutoBattle(request params.CreateAutoBattle) *param
 		return &params.Response{
 			Status: http.StatusBadRequest,
 			Payload: gin.H{
-				"error": "Pokemon is duplicated, please re-check",
+				"error": "pokemon is duplicated, please re-check",
 			},
 		}
 	}
@@ -42,7 +42,7 @@ func (b *BattleService) CreateAutoBattle(request params.CreateAutoBattle) *param
 		return &params.Response{
 			Status: http.StatusBadRequest,
 			Payload: gin.H{
-				"error": "Total Pokemons must be 5",
+				"error": "total Pokemons must be 5",
 			},
 		}
 	}
